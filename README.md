@@ -682,15 +682,64 @@ graph TD
 *Обоснование : слоник наше всё, куча различных фитч и удобный софт для администрирования и анализа*
 
 #### Докер
+Для обеспечения работы приложения с PostgreSQL в изолированной среде был создан файл docker-compose.yml, который разворачивает два контейнера:
+PostgreSQL – сервер базы данных с настроенным пользователем, паролем и именем БД.
+Приложение – контейнер с программой FastAPI, которая взаимодействует с PostgreSQL.
+docker
 ```
-FROM python:3.9-slim
+FROM python:3.9.13
+
 WORKDIR /app
+
+COPY app/ .
 COPY requirements.txt .
-RUN pip install --no-cache-dir -r requirements.txt
-COPY . .
-EXPOSE 8000
-CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000"]
+
+RUN pip install -r requirements.txt
+
+CMD ["python", "main.py"]
 ```
+docker-compose
+```
+version: '3.8'
+
+services:
+  db:
+    image: postgres:latest
+    container_name: amrs_postgres
+    environment:
+      POSTGRES_PASSWORD: cport2003
+      POSTGRES_DB: AMRS
+    ports:
+      - "5438:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - app_network
+
+  app:
+    build: .
+    container_name: fastapi_app
+    ports:
+      - "8000:8000"
+    depends_on:
+      - db
+    networks:
+      - app_network
+    environment:
+      - DB_HOST=amrs_postgres
+      - DB_PORT=5432
+      - DB_NAME=AMRS
+      - DB_USER=postgres
+      - DB_PASSWORD=cport2003
+
+volumes:
+  postgres_data:
+
+networks:
+  app_network:
+    driver: bridge
+```
+
 При самой разработке используется инструмент изоляции окружения venv.
 
 *P.S. Спецификация API, и весь код могут поменяться во время разработки, на данном этапе предоставлены основные ключевые моменты, которых я постараюсь придерживаться. Изменения будут вносится в документацию.*

@@ -1,7 +1,8 @@
 from fastapi import FastAPI, HTTPException, Path, Query
 from typing import List, Optional
-from app.schemas.sc_all import *
-from app.sql_func.sql_func import *
+from schemas.sc_all import *
+from sql_func.sql_func import *
+import uvicorn
 
 # Пример данных (для демонстрации)
 employees_db = []
@@ -81,6 +82,7 @@ def get_trades_by_status(status: TradeStatus = Query(..., description="Стат�
 def get_trades_by_responsible_fio(fio: str = Query(..., description="ФИО ответственного сотрудника")):
     try:
         trds = take_trade_by_FIO(fio)
+        print(trds)
         return [{"id":t[0], "trade_number":t[1], "title":t[2], "description":t[3], "start_date":t[4], "end_date":t[5], "status":t[7], "responsible_id":t[6]} for t in trds]
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
@@ -102,3 +104,6 @@ def update_trade_status(trade_id: int = Path(..., description="ID торгов",
         return {"id":t[0], "trade_number":t[1], "title":t[2], "description":t[3], "start_date":t[4], "end_date":t[5], "status":t[7], "responsible_id":t[6]}
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
+
+if __name__ == "__main__":
+    uvicorn.run("main:app", host="0.0.0.0", port=8000)

@@ -1,0 +1,38 @@
+version: '3.8'
+
+services:
+  db:
+    image: postgres:latest
+    container_name: amrs_postgres
+    environment:
+      POSTGRES_PASSWORD: cport2003
+      POSTGRES_DB: AMRS
+    ports:
+      - "5438:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - app_network
+
+  app:
+    build: .
+    container_name: fastapi_app
+    ports:
+      - "8000:8000"
+    depends_on:
+      - db
+    networks:
+      - app_network
+    environment:
+      - DB_HOST=amrs_postgres
+      - DB_PORT=5432
+      - DB_NAME=AMRS
+      - DB_USER=postgres
+      - DB_PASSWORD=cport2003
+
+volumes:
+  postgres_data:
+
+networks:
+  app_network:
+    driver: bridge

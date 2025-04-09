@@ -1,13 +1,16 @@
-import sqlite3
-from datetime import datetime, timedelta
-import random
-from faker import Faker
-import random
+import psycopg2
 
-if __name__ == "__main__":
-    conn = sqlite3.connect("app/sql_func/efrsb.db")
-    mas_state = ["active", "applied", "purchased", "not purchased"]
-    rez = conn.execute("select * from trades").fetchall()
-    for i in rez:
-        conn.execute("update trades set status = ? where id = ?", (random.choice(mas_state), i[0]))
-        conn.commit()
+connection = psycopg2.connect(
+    dbname="AMRS",
+    user="postgres",      
+    password="cport2003",
+    host="localhost",      
+    port="5432"             
+)
+# Создание курсора для выполнения запросов
+cursor = connection.cursor()
+
+cursor.execute("SELECT * FROM trades;")
+rows = cursor.fetchall()
+for row in rows:
+    print(row)
