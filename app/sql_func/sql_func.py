@@ -8,7 +8,7 @@ def db_conn():
         dbname="AMRS",
         user="postgres",      
         password="cport2003",
-        host="amrs_postgres",
+        host="localhost",
         port="5432"             
     )
     cur = conn.cursor()
