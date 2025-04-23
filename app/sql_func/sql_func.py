@@ -4,6 +4,13 @@ import psycopg2
 # Контекстный менеджер для автоматического подключения/отключения
 @contextmanager
 def db_conn():
+    # conn = psycopg2.connect(
+    #     dbname="AMRS",
+    #     user="postgres",      
+    #     password="cport2003",
+    #     host="amrs_postgres",
+    #     port="5432"             
+    # )
     conn = psycopg2.connect(
         dbname="AMRS",
         user="postgres",      

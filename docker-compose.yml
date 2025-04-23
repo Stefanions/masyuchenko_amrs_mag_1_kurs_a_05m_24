@@ -14,19 +14,37 @@ services:
     networks:
       - app_network
 
-  app:
-    build: .
-    container_name: fastapi_app
-    ports:
-      - "8000:8000"
+  tests:
+    build:
+      context: .
+      target: test
+    container_name: fastapi_tests
     depends_on:
       - db
     networks:
       - app_network
     environment:
-      DB_HOST: ${DB_HOST}
-      DB_PORT: ${DB_PORT}
-      DB_NAME: ${DB_NAME}
+      DB_HOST: db
+      DB_PORT: 5432
+      DB_NAME: ${POSTGRES_DB}
+      DB_USER: ${DB_USER}
+      DB_PASSWORD: ${POSTGRES_PASSWORD}
+
+  app:
+    build:
+      context: .
+      target: production
+    container_name: fastapi_app
+    ports:
+      - "8000:8000"
+    depends_on:
+      - tests
+    networks:
+      - app_network
+    environment:
+      DB_HOST: db
+      DB_PORT: 5432
+      DB_NAME: ${POSTGRES_DB}
       DB_USER: ${DB_USER}
       DB_PASSWORD: ${POSTGRES_PASSWORD}
 

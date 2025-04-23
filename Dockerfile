@@ -1,10 +1,17 @@
-FROM python:3.9.13
+# Базовый образ для сборки Python-приложения
+FROM python:3.9.13 as base
 
+# Установка зависимостей
 WORKDIR /app
-
-COPY app/ .
 COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
 
-RUN pip install -r requirements.txt
+# Этап тестирования
+FROM base AS test
+COPY . .
+CMD pytest app/tests/
 
-CMD ["python", "main.py"]
+# Этап production
+FROM base AS production
+COPY . .
+CMD ["python", "app/main.py"]

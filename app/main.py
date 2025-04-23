@@ -1,14 +1,34 @@
-from fastapi import FastAPI, HTTPException, Path, Query
+from fastapi import FastAPI, HTTPException, Path, Query, Request
 from typing import List, Optional
 from schemas.sc_all import *
 from sql_func.sql_func import *
 import uvicorn
+from collections import Counter
+from typing import Dict
 
 # Пример данных (для демонстрации)
 employees_db = []
 trades_db = []
 
 app = FastAPI()
+
+request_counter = Counter()
+start_time = datetime.now()
+
+@app.middleware("http")
+async def count_requests(request: Request, call_next):
+    response = await call_next(request)
+    request_counter[response.status_code] += 1
+    return response
+
+@app.get("/stats")
+async def stats():
+    return {
+        "version": "1.0.0",
+        "requests_count": dict(request_counter),
+        "uptime": str(datetime.now() - start_time),
+        "start_time": start_time.isoformat(),
+    }
 
 @app.get("/")
 def read_root():
@@ -105,5 +125,8 @@ def update_trade_status(trade_id: int = Path(..., description="ID торгов",
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
+
+
 if __name__ == "__main__":
+    # uvicorn.run("main:app", host="0.0.0.0", port=8000)
     uvicorn.run("main:app", host="localhost")
